@@ -51,6 +51,7 @@ import org.apache.ignite.ci.tcbot.chain.PrChainsProcessor;
 import org.apache.ignite.ci.tcbot.conf.IGitHubConfig;
 import org.apache.ignite.ci.tcbot.conf.IJiraServerConfig;
 import org.apache.ignite.ci.tcbot.conf.ITcBotConfig;
+import org.apache.ignite.ci.tcbot.trigger.ChainBuildLink;
 import org.apache.ignite.ci.tcmodel.mute.MuteInfo;
 import org.apache.ignite.ci.tcmodel.result.Build;
 import org.apache.ignite.ci.teamcity.ignited.BuildRefCompacted;
@@ -645,6 +646,19 @@ public class TcBotTriggerAndSignOffService {
 
         status.webLinksQueuedSuites = Stream.concat(queuedSuites.stream(), runningSuites.stream())
             .map(ref -> getWebLinkToQueued(teamcity, ref)).collect(Collectors.toList());
+
+        status.queuedSuites =
+            Stream.concat(queuedSuites.stream(), runningSuites.stream())
+            .map(ref -> {
+                ChainBuildLink buildLink = new ChainBuildLink();
+
+
+
+                buildLink.webUrl(getWebLinkToQueued(teamcity, ref));
+
+                return buildLink;
+            })
+                .collect(Collectors.toList());
 
         return status;
     }

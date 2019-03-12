@@ -18,6 +18,7 @@ package org.apache.ignite.ci.tcbot.visa;
 
 import java.util.LinkedList;
 import java.util.List;
+import org.apache.ignite.ci.tcbot.trigger.ChainBuildLink;
 
 /**
  * Status of contribution check details returned from server. UI model for displaying detailed {@link
@@ -50,6 +51,9 @@ import java.util.List;
 
     /** Web links to queued suites. */
     public List<String> webLinksQueuedSuites = new LinkedList<>();
+
+    /** Web links to queued suites. */
+    public List<ChainBuildLink> queuedSuites = new LinkedList<>();
 
     public ContributionCheckStatus() {
     }

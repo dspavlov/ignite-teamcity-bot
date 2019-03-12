@@ -17,13 +17,16 @@
 
 package org.apache.ignite.ci.tcbot.trigger;
 
-import org.apache.ignite.ci.web.model.SimpleResult;
+import org.apache.ignite.ci.tcbot.chain.RevisionsSummary;
 
 /**
  *
  */
-public class TriggerResult extends SimpleResult {
-    public TriggerResult(String res) {
-        super(res);
+public class ChainBuildLink extends RevisionsSummary {
+    /** Web url to suite. */
+    String webUrl;
+
+    public void webUrl(String webUrl) {
+        this.webUrl = webUrl;
     }
 }

@@ -30,32 +30,32 @@ $(document).ready(function() {
 function parmsForRest() {
     var curReqParms = "";
     var branchForTc = findGetParameter("branchForTc");
-    if(branchForTc!=null) {
+    if (branchForTc != null) {
         curReqParms += "?branchForTc=" + branchForTc;
     }
 
     var serverId = findGetParameter("serverId");
-    if(serverId!=null) {
+    if (serverId != null) {
         curReqParms += "&serverId=" + serverId;
     }
 
     var suiteId = findGetParameter("suiteId");
-    if(suiteId!=null) {
+    if (suiteId != null) {
         curReqParms += "&suiteId=" + suiteId;
     }
 
     var action = findGetParameter("action");
-    if(action!=null) {
+    if (action != null) {
         curReqParms += "&action=" + action;
     }
 
     var count = findGetParameter("count");
-    if(count!=null) {
+    if (count != null) {
         curReqParms += "&count=" + count;
     }
 
     var baseBranchForTc = findGetParameter("baseBranchForTc");
-    if(baseBranchForTc != null) {
+    if (baseBranchForTc != null) {
         curReqParms += "&baseBranchForTc=" + baseBranchForTc;
     }
 

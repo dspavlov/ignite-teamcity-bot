@@ -201,6 +201,7 @@ public interface ITeamcityIgnited {
      */
     public List<Agent> agents(boolean connected, boolean authorized);
 
+    @Deprecated
     /**
      * @param build Build.
      */
