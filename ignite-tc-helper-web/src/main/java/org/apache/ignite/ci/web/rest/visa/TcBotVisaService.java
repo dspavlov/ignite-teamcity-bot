@@ -16,10 +16,17 @@
  */
 package org.apache.ignite.ci.web.rest.visa;
 
+import com.google.common.base.Strings;
 import com.google.inject.Injector;
-import java.util.Collection;
-import java.util.List;
-import java.util.Set;
+import org.apache.ignite.ci.observer.BuildObserver;
+import org.apache.ignite.ci.tcbot.visa.*;
+import org.apache.ignite.ci.teamcity.ignited.ITeamcityIgnitedProvider;
+import org.apache.ignite.ci.user.ICredentialsProv;
+import org.apache.ignite.ci.web.CtxListener;
+import org.apache.ignite.ci.web.model.ContributionKey;
+import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
+
 import javax.annotation.Nonnull;
 import javax.servlet.ServletContext;
 import javax.servlet.http.HttpServletRequest;
@@ -41,6 +48,10 @@ import org.apache.ignite.ci.web.CtxListener;
 import org.apache.ignite.ci.web.model.ContributionKey;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
+import java.util.Collection;
+import java.util.List;
+import java.util.Set;
+import java.util.stream.Collectors;
 
 @Path("visa")
 @Produces(MediaType.APPLICATION_JSON)
@@ -88,6 +99,22 @@ public class TcBotVisaService {
         injector.getInstance(ITeamcityIgnitedProvider.class).checkAccess(srvCode, credsProv);
 
         return injector.getInstance(TcBotTriggerAndSignOffService.class).getContributionsToCheck(srvCode, credsProv);
+    }
+
+    @GET
+    @Path("readyForReview")
+    public List<ContributionToCheck> readyForReview(@Nullable @QueryParam("serverId") String srvCode) {
+        final List<ContributionToCheck> contributions = contributions(srvCode);
+
+        return contributions.stream().filter(
+                c -> !Strings.isNullOrEmpty(c.tcBranchName)
+        ).collect(Collectors.toList());
+        /*
+        todo check current visa status from
+
+        return injector.getInstance(TcBotTriggerAndSignOffService.class)
+            .currentVisaStatus(srvCode, prov, suiteId, tcBranch); <-Without caching
+         */
     }
 
     @GET

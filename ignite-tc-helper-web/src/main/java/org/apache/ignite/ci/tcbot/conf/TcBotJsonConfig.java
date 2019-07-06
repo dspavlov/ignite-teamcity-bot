@@ -88,7 +88,7 @@ public class TcBotJsonConfig implements ITrackedBranchesConfig {
     }
 
     Optional<TcServerConfig> getTcConfig(String code) {
-        return tcServers.stream().filter(s -> code.equals(s.getCode())).findAny();
+        return tcServers.stream().filter(s -> Objects.equals(code, s.getCode())).findAny();
     }
 
     Optional<JiraServerConfig> getJiraConfig(String code) {
