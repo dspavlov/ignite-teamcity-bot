@@ -36,13 +36,17 @@ import javax.inject.Inject;
 import javax.inject.Provider;
 import org.apache.ignite.Ignite;
 import org.apache.ignite.IgniteCache;
+import org.apache.ignite.binary.BinaryObject;
 import org.apache.ignite.cache.QueryEntity;
 import org.apache.ignite.cache.query.QueryCursor;
+import org.apache.ignite.cache.query.ScanQuery;
 import org.apache.ignite.cache.query.SqlQuery;
 import org.apache.ignite.ci.teamcity.ignited.BuildRefCompacted;
 import org.apache.ignite.ci.teamcity.ignited.runhist.RunHistKey;
 import org.apache.ignite.configuration.CacheConfiguration;
 import org.apache.ignite.internal.util.GridIntList;
+import org.apache.ignite.lang.IgniteCallable;
+import org.apache.ignite.resources.IgniteInstanceResource;
 import org.apache.ignite.tcbot.common.exeption.ExceptionUtil;
 import org.apache.ignite.tcbot.common.interceptor.AutoProfiling;
 import org.apache.ignite.tcbot.common.interceptor.GuavaCached;
@@ -104,7 +108,7 @@ public class BuildRefDao {
      * @param srvId Server id.
      */
     public static boolean isKeyForServer(Long key, int srvId) {
-        return key!=null && key >> 32 == srvId;
+        return key!=null && cacheKeyToSrvId(key) == srvId;
     }
 
     /**
@@ -166,6 +170,13 @@ public class BuildRefDao {
     public static int cacheKeyToBuildId(Long cacheKey) {
         long l = cacheKey << 32;
         return (int)(l >> 32);
+    }
+
+    /**
+     * @param cacheKey Cache key.
+     */
+    public static int cacheKeyToSrvId(long cacheKey) {
+        return (int)(cacheKey >> 32);
     }
 
     /**
@@ -306,5 +317,9 @@ public class BuildRefDao {
     @Nonnull public Stream<Cache.Entry<Long, BuildRefCompacted>> getAllBuildRefs(int srvId) {
         return StreamSupport.stream(buildRefsCache.spliterator(), false)
                 .filter(entry -> isKeyForServer(entry.getKey(), srvId));
+    }
+
+    public IgniteCache<Long, BuildRefCompacted> buildRefsCache() {
+        return buildRefsCache;
     }
 }
