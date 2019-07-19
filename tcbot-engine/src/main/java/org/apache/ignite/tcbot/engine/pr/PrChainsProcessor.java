@@ -274,14 +274,15 @@ public class PrChainsProcessor {
     }
 
     /**
-     * @return OnlyFailures for given server.
+     * @return Blocker failures for given server.
      * @param fullChainRunCtx
      * @param tcIgnited
      * @param baseBranch
      */
     //todo may avoid creation of UI model for simple comment.
-    private List<DsSuiteUi> findBlockerFailures(FullChainRunCtx fullChainRunCtx, ITeamcityIgnited tcIgnited,
-                                                String baseBranch) {
+    private List<DsSuiteUi> findBlockerFailures(FullChainRunCtx fullChainRunCtx,
+        ITeamcityIgnited tcIgnited,
+        String baseBranch) {
         return fullChainRunCtx
             .failedChildSuites()
             .map((ctx) -> {

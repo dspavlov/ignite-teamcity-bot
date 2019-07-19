@@ -207,6 +207,7 @@ public class BuildChainProcessor {
         FullChainRunCtx fullChainRunCtx = new FullChainRunCtx(FutureUtil.getResult(build).toBuild(compactor));
 
         Function<MultBuildRunCtx, Double> function = null;
+
         if (sortOption == null || sortOption == SortOption.FailureRate) {
             function = ctx -> {
                 IRunHistory runStat = ctx.history(tcIgn, failRateBranchId);
@@ -218,7 +219,7 @@ public class BuildChainProcessor {
                 return runStat.getCriticalFailRate() * 3.14d + runStat.getFailRate();
             };
         }
-        else {
+        else if (sortOption == SortOption.SuiteDuration) {
             function = ctx -> {
                 Long duration = ctx.buildDuration();
 

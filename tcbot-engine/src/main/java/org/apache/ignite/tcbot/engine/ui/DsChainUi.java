@@ -170,7 +170,6 @@ public class DsChainUi {
         failedToFinish = 0;
         totalTests = 0;
         trustedTests = 0;
-        //todo mode with not failed
 
         String failRateNormalizedBranch = normalizeBranch(baseBranchTc);
         Integer baseBranchId = compactor.getStringIdIfPresent(failRateNormalizedBranch);

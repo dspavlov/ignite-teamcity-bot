@@ -26,7 +26,6 @@ import org.apache.ignite.tcignited.creds.ICredentialsProv;
  * Process failures for some setup tracked branch, which may be triggered/monitored by TC Bot.
  */
 public interface IDetailedStatusForTrackedBranch {
-
     /**
      * @param branch Branch.
      * @param checkAllLogs Check all logs.
@@ -36,7 +35,7 @@ public interface IDetailedStatusForTrackedBranch {
      * @param calcTrustedTests Calculate trusted tests count.
      * @param tagSelected Selected tag based filter. If null or empty all data is returned.
      * @param displayMode Suites and tests display mode. Default - failures only.
-     * @param sortOption
+     * @param sortOption Sort mode
      */
     public DsSummaryUi getTrackedBranchTestFailures(
         @Nullable String branch,
@@ -46,7 +45,8 @@ public interface IDetailedStatusForTrackedBranch {
         SyncMode syncMode,
         boolean calcTrustedTests,
         @Nullable String tagSelected,
-        DisplayMode displayMode, SortOption sortOption);
+        @Nullable DisplayMode displayMode,
+        @Nullable SortOption sortOption);
 
     //  * @param baseTrackedBranch Branch tracked branch in Bot, has a priority if both TC & Bot branches (baseBranchForTcParm) present.
 }
