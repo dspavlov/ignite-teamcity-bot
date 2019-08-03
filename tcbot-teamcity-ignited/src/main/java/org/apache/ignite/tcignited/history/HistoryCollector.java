@@ -101,7 +101,6 @@ public class HistoryCollector {
         .expireAfterAccess(16, TimeUnit.MINUTES)
         .softValues()
         .build();
-    //todo a lot of histories hold here
 
     /**
      * @param srvIdMaskHigh Server id mask to be placed at high bits in the key.

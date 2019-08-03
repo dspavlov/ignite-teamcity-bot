@@ -23,7 +23,6 @@ import java.util.*;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
-import org.apache.ignite.tcbot.common.TcBotConst;
 import org.apache.ignite.tcignited.history.RunStatus;
 
 import javax.annotation.Nonnull;

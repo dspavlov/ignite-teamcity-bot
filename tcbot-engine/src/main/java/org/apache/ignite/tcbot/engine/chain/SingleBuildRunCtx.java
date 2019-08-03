@@ -46,7 +46,6 @@ import org.apache.ignite.tcignited.build.ITest;
 import org.apache.ignite.tcignited.buildlog.ILogCheckResult;
 import org.apache.ignite.tcignited.buildlog.ITestLogCheckResult;
 import org.apache.ignite.tcservice.ITeamcity;
-import org.apache.ignite.tcservice.model.result.tests.TestOccurrenceFull;
 
 /**
  * Single build occurrence with changes, tag and log results.

@@ -24,8 +24,6 @@ import java.nio.charset.StandardCharsets;
 import java.util.Arrays;
 import java.util.BitSet;
 import java.util.Objects;
-import java.util.TreeMap;
-import java.util.function.BiPredicate;
 
 import org.apache.ignite.ci.tcbot.common.StringFieldCompacted;
 import org.apache.ignite.tcbot.persistence.Persisted;
@@ -33,9 +31,8 @@ import org.apache.ignite.tcignited.build.ITest;
 import org.apache.ignite.tcignited.build.TestCompactedV2;
 import org.apache.ignite.tcservice.model.result.tests.TestOccurrence;
 import org.apache.ignite.tcbot.persistence.IStringCompactor;
-import org.apache.ignite.ci.teamcity.ignited.buildtype.ParametersCompacted;
-import org.apache.ignite.ci.teamcity.ignited.runhist.Invocation;
-import org.apache.ignite.ci.teamcity.ignited.runhist.InvocationData;
+
+import org.apache.ignite.tcservice.model.result.tests.TestOccurrenceFull;
 import org.apache.ignite.tcservice.model.result.tests.TestOccurrenceFull;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
