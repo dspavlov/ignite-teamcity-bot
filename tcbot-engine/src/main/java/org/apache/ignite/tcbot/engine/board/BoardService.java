@@ -20,6 +20,7 @@ import com.google.common.base.Preconditions;
 import com.google.common.base.Strings;
 import java.util.Collection;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
@@ -85,8 +86,10 @@ public class BoardService {
         List<DefectCompacted> defects = defectStorage.loadAllDefects();
 
         BoardSummaryUi res = new BoardSummaryUi();
+        boolean admin = userStorage.getUser(creds.getPrincipalId()).isAdmin();
         for (DefectCompacted next : defects) {
             BoardDefectSummaryUi defectUi = new BoardDefectSummaryUi(next, compactor);
+            defectUi.setForceResolveAllowed(admin);
 
             String srvCode = next.tcSrvCode(compactor);
 
@@ -158,9 +161,8 @@ public class BoardService {
                         fatBuildCompacted.buildTypeId(compactor),
                         fatBuildCompacted.branchName(compactor)
                 );
-            } else {
+            } else
                 status = IssueResolveStatus.UNKNOWN;
-            }
         } else {
             if (rebuild.isPresent()) {
                 testResult = rebuild.get().getAllTests()
@@ -204,14 +206,14 @@ public class BoardService {
         Stream<Issue> stream = issuesStorage.allIssues();
 
         //todo make property how old issues can be considered as configuration parameter
-        long minIssueTs = System.currentTimeMillis() - TimeUnit.DAYS.toMillis(9);
+        long minIssueTs = System.currentTimeMillis() - TimeUnit.DAYS.toMillis(14);
 
         //todo not so good to to call init() twice
         fatBuildDao.init();
         changeDao.init();
 
         AtomicInteger cntIssues = new AtomicInteger();
-        AtomicInteger cntDefects = new AtomicInteger();
+        HashSet<Integer> processedDefects = new HashSet<>();
         stream
             .filter(issue -> {
                 long detected = issue.detectedTs == null ? 0 : issue.detectedTs;
@@ -246,7 +248,7 @@ public class BoardService {
                 int tcSrvCodeCid = compactor.getStringId(srvCode);
                 defectStorage.merge(tcSrvCodeCid, srvId, fatBuild,
                     (k, defect) -> {
-                        cntDefects.incrementAndGet();
+                        processedDefects.add(defect.id());
 
                         defect.trackedBranchCidSetIfEmpty(trackedBranchCid);
 
@@ -262,7 +264,7 @@ public class BoardService {
 
             });
 
-        return cntDefects.get() + " defects processed for " + cntIssues.get() + " issues checked";
+        return processedDefects.size() + " defects processed for " + cntIssues.get() + " issues checked";
     }
 
     private void fillBlameCandidates(int srvId, FatBuildCompacted fatBuild, DefectCompacted defect) {
@@ -306,12 +308,18 @@ public class BoardService {
         }
     }
 
-    public void resolveDefect(Integer defectId, ICredentialsProv creds) {
+    public void resolveDefect(Integer defectId, ICredentialsProv creds, Boolean forceResolve) {
         DefectCompacted defect = defectStorage.load(defectId);
-        Preconditions.checkState(defect!=null, "Can't find defect by ID");
+        Preconditions.checkState(defect != null, "Can't find defect by ID");
 
         String principalId = creds.getPrincipalId();
-        TcHelperUser user = userStorage.getUser(principalId);
+        if(Boolean.TRUE.equals(forceResolve)) {
+            boolean admin = userStorage.getUser(principalId).isAdmin();
+
+            Preconditions.checkState(admin);
+        }
+
+        //todo if it is not forced resovle need to check blockers count for now
 
         int strId = compactor.getStringId(principalId);
         defect.resolvedByUsernameId(strId);
