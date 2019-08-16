@@ -258,8 +258,7 @@ public class CheckQueueJob implements Runnable {
 
         startTimes.put(chain, curr);
 
-        tcIgn.triggerBuild(buildTypeId, tcBranch, true, false,
-                chain.generateBuildParameters());
+        tcIgn.triggerBuild(buildTypeId, tcBranch, true, false, chain.generateBuildParameters());
 
         return buildTypeId + " " +  tcBranch  + " triggered; ";
     }

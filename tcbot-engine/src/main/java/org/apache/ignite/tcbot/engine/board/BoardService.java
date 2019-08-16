@@ -18,6 +18,18 @@ package org.apache.ignite.tcbot.engine.board;
 
 import com.google.common.base.Preconditions;
 import com.google.common.base.Strings;
+import java.util.Collection;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.Optional;
+import java.util.concurrent.Future;
+import java.util.concurrent.TimeUnit;
+import java.util.concurrent.atomic.AtomicInteger;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
+import javax.annotation.Nullable;
+import javax.inject.Inject;
 import org.apache.ignite.ci.issue.Issue;
 import org.apache.ignite.ci.issue.IssueKey;
 import org.apache.ignite.ci.teamcity.ignited.change.ChangeCompacted;
@@ -30,10 +42,18 @@ import org.apache.ignite.tcbot.common.interceptor.MonitoredTask;
 import org.apache.ignite.tcbot.common.util.FutureUtil;
 import org.apache.ignite.tcbot.engine.chain.BuildChainProcessor;
 import org.apache.ignite.tcbot.engine.chain.SingleBuildRunCtx;
-import org.apache.ignite.tcbot.engine.defect.*;
+import org.apache.ignite.tcbot.engine.defect.BlameCandidate;
+import org.apache.ignite.tcbot.engine.defect.DefectCompacted;
+import org.apache.ignite.tcbot.engine.defect.DefectFirstBuild;
+import org.apache.ignite.tcbot.engine.defect.DefectIssue;
+import org.apache.ignite.tcbot.engine.defect.DefectsStorage;
 import org.apache.ignite.tcbot.engine.issue.IIssuesStorage;
 import org.apache.ignite.tcbot.engine.issue.IssueType;
-import org.apache.ignite.tcbot.engine.ui.*;
+import org.apache.ignite.tcbot.engine.ui.BoardDefectIssueUi;
+import org.apache.ignite.tcbot.engine.ui.BoardDefectSummaryUi;
+import org.apache.ignite.tcbot.engine.ui.BoardSummaryUi;
+import org.apache.ignite.tcbot.engine.ui.DsSuiteUi;
+import org.apache.ignite.tcbot.engine.ui.DsTestFailureUi;
 import org.apache.ignite.tcbot.engine.user.IUserStorage;
 import org.apache.ignite.tcbot.persistence.IStringCompactor;
 import org.apache.ignite.tcbot.persistence.scheduler.IScheduler;
@@ -42,15 +62,6 @@ import org.apache.ignite.tcignited.ITeamcityIgnitedProvider;
 import org.apache.ignite.tcignited.build.FatBuildDao;
 import org.apache.ignite.tcignited.build.ITest;
 import org.apache.ignite.tcignited.creds.ICredentialsProv;
-
-import javax.annotation.Nullable;
-import javax.inject.Inject;
-import java.util.*;
-import java.util.concurrent.Future;
-import java.util.concurrent.TimeUnit;
-import java.util.concurrent.atomic.AtomicInteger;
-import java.util.stream.Collectors;
-import java.util.stream.Stream;
 
 public class BoardService {
     @Inject IIssuesStorage issuesStorage;
@@ -163,14 +174,8 @@ public class BoardService {
 
                 if (test.isIgnoredTest() || test.isMutedTest())
                     status = IssueResolveStatus.IGNORED;
-                else {
-                    boolean failed = test.isFailedTest(compactor);
-                    if (!failed) {
-                        status = IssueResolveStatus.FIXED;
-                    } else {
-                        status = IssueResolveStatus.FAILING;
-                    }
-                }
+                else
+                    status = test.isFailedTest(compactor) ? IssueResolveStatus.FAILING : IssueResolveStatus.FIXED;
 
                 FatBuildCompacted fatBuildCompacted = rebuild.get();
                 Long testNameId = test.getTestId();
@@ -178,13 +183,12 @@ public class BoardService {
                 String branchName = fatBuildCompacted.branchName(compactor);
 
                 webUrl = DsTestFailureUi.buildWebLink(tcIgn, testNameId, projectId, branchName);
-            } else {
+            }
+            else {
                 //exception for new test. removal of test means test is fixed
-                if (IssueType.newContributedTestFailure.code().equals(issueType)) {
-                    status = IssueResolveStatus.FIXED;
-                } else {
-                    status = IssueResolveStatus.UNKNOWN;
-                }
+                status = IssueType.newContributedTestFailure.code().equals(issueType)
+                    ? IssueResolveStatus.FIXED
+                    : IssueResolveStatus.UNKNOWN;
             }
         }
 
@@ -200,7 +204,7 @@ public class BoardService {
         Stream<Issue> stream = issuesStorage.allIssues();
 
         //todo make property how old issues can be considered as configuration parameter
-        long minIssueTs = System.currentTimeMillis() - TimeUnit.DAYS.toMillis(7);
+        long minIssueTs = System.currentTimeMillis() - TimeUnit.DAYS.toMillis(9);
 
         //todo not so good to to call init() twice
         fatBuildDao.init();
@@ -309,8 +313,8 @@ public class BoardService {
         String principalId = creds.getPrincipalId();
         TcHelperUser user = userStorage.getUser(principalId);
 
-        int stringId = compactor.getStringId(principalId);
-        defect.resolvedByUsernameId(stringId);
+        int strId = compactor.getStringId(principalId);
+        defect.resolvedByUsernameId(strId);
 
         defectStorage.save(defect);
     }
